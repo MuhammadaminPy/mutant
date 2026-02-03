@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<title>TON Games</title>
+<link rel="stylesheet" href="./css/styles.css"/>
+</head>
+<body>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-balance" id="topbar-balance">
+    <span class="topbar-bal-icon">💎</span>
+    <span id="balance-display">0.00</span>
+    <span class="topbar-bal-unit">TON</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn-topbar btn-deposit" onclick="openDepositModal()">＋ Пополнить</button>
+  </div>
+</div>
+
+<!-- MAIN CONTENT AREA -->
+<div class="main-content" id="main-content">
+
+  <!-- ═══ GAMES TAB ═══ -->
+  <div class="tab-page active" id="page-games">
+    <h1 class="page-title">🎮 Игры</h1>
+    <div class="games-list">
+      <div class="game-card game-card-featured" onclick="openGame('gift_upgrade')">
+        <div class="game-card-bg game-bg-upgrade"></div>
+        <div class="game-card-content">
+          <div class="game-icon-large">🎰</div>
+          <div class="game-info">
+            <div class="game-name">Gift Upgrade</div>
+            <div class="game-desc">Крути рулетку и выигрывай!</div>
+          </div>
+          <div class="game-arrow">›</div>
+        </div>
+      </div>
+      <div class="game-card game-card-featured" onclick="openGame('rolls')">
+        <div class="game-card-bg game-bg-rolls"></div>
+        <div class="game-card-content">
+          <div class="game-icon-large">💎</div>
+          <div class="game-info">
+            <div class="game-name">Rolls</div>
+            <div class="game-desc">Ставь и выигрывай в реальном времени</div>
+          </div>
+          <div class="game-arrow">›</div>
+        </div>
+      </div>
+      <div class="game-card game-card-featured" onclick="openGame('mutants')">
+        <div class="game-card-bg game-bg-mutants"></div>
+        <div class="game-card-content">
+          <div class="game-icon-large">📦</div>
+          <div class="game-info">
+            <div class="game-name">Mutants</div>
+            <div class="game-desc">Открывай кейсы и собирай подарки</div>
+          </div>
+          <div class="game-arrow">›</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ LEADERBOARD TAB ═══ -->
+  <div class="tab-page" id="page-leaderboard">
+    <h1 class="page-title">🏆 Лидерборд</h1>
+    <div class="leaderboard-subtitle">Топ по общим пополнениям</div>
+    <div class="leaderboard-list" id="leaderboard-list">
+      <div class="leaderboard-loading">Загрузка...</div>
+    </div>
+  </div>
+
+  <!-- ═══ PROFILE TAB ═══ -->
+  <div class="tab-page" id="page-profile">
+    <div class="profile-header">
+      <div class="profile-avatar" id="profile-avatar">
+        <img src="" alt="" id="profile-avatar-img" onerror="this.style.display='none'"/>
+        <span class="profile-avatar-fallback" id="profile-avatar-fb">?</span>
+      </div>
+      <div class="profile-name" id="profile-name">User</div>
+      <div class="profile-username" id="profile-username">@username</div>
+    </div>
+    <div class="profile-stats">
+      <div class="stat-card">
+        <div class="stat-label">Игры</div>
+        <div class="stat-value" id="stat-games">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Баланс</div>
+        <div class="stat-value" id="stat-balance">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Пополнено</div>
+        <div class="stat-value" id="stat-deposited">0</div>
+      </div>
+    </div>
+    <div class="profile-buttons">
+      <button class="btn-profile btn-deposit-prof" onclick="openDepositModal()">💰 Пополнить</button>
+      <button class="btn-profile btn-withdraw-prof" onclick="openWithdrawModal()">📤 Вывести</button>
+      <button class="btn-profile btn-ref-prof" onclick="openReferralModal()">🔗 Рефералы</button>
+    </div>
+    <!-- Inventory -->
+    <div class="inventory-section">
+      <div class="inventory-header">
+        <span class="inventory-title">📦 Инвентарь</span>
+        <button class="btn-sell-all" onclick="sellAll()">Продать всё</button>
+      </div>
+      <div class="inventory-grid" id="inventory-grid">
+        <div class="inventory-empty">Инвентарь пуст</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main-content -->
+
+<!-- ═══ BOTTOM NAV ═══ -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-games" onclick="switchTab('games')">
+    <span class="nav-icon">🎮</span><span class="nav-label">Игры</span>
+  </button>
+  <button class="nav-btn" id="nav-leaderboard" onclick="switchTab('leaderboard')">
+    <span class="nav-icon">🏆</span><span class="nav-label">Лидерборд</span>
+  </button>
+  <button class="nav-btn" id="nav-profile" onclick="switchTab('profile')">
+    <span class="nav-icon">👤</span><span class="nav-label">Профиль</span>
+  </button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══ GAME SCREENS (overlays) ════════════════════════════════════ -->
+
+<!-- ── Gift Upgrade Screen ── -->
+<div class="game-screen" id="screen-gift-upgrade">
+  <div class="game-screen-header">
+    <button class="btn-back" onclick="closeGameScreen('gift-upgrade')">← Назад</button>
+    <span class="game-screen-title">🎰 Gift Upgrade</span>
+    <span class="game-screen-bal" id="gu-balance">0 TON</span>
+  </div>
+  <div class="gu-container">
+    <!-- Roulette wheel -->
+    <div class="roulette-wrap">
+      <div class="roulette-pointer"></div>
+      <div class="roulette-outer">
+        <svg class="roulette-wheel" id="roulette-wheel" viewBox="0 0 400 400">
+          <defs>
+            <filter id="shadow"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.5"/></filter>
+          </defs>
+          <!-- segments drawn by JS -->
+          <g id="wheel-segments"></g>
+          <!-- center circle -->
+          <circle cx="200" cy="200" r="38" fill="#1a1a2e" stroke="#c9a227" stroke-width="4"/>
+          <text x="200" y="207" text-anchor="middle" font-size="28" fill="#c9a227">💎</text>
+        </svg>
+      </div>
+    </div>
+    <!-- Controls -->
+    <div class="gu-controls">
+      <div class="gu-stake-row">
+        <label>Ставка (TON)</label>
+        <div class="gu-input-wrap">
+          <button class="gu-minus" onclick="changeStake(-0.1)">−</button>
+          <input type="number" id="gu-stake-input" value="0.1" step="0.01" min="0.01"/>
+          <button class="gu-plus" onclick="changeStake(0.1)">＋</button>
+        </div>
+      </div>
+      <div class="gu-mult-row">
+        <label>Выбрать выигрыш</label>
+        <div class="gu-mult-btns" id="gu-mult-btns">
+          <!-- generated by JS -->
+        </div>
+      </div>
+      <div class="gu-selected-info" id="gu-selected-info">
+        <span>Потенциальный выигрыш: <strong id="gu-potential">—</strong></span>
+        <span>Шанс победы: <strong id="gu-chance">—</strong></span>
+      </div>
+      <button class="btn-spin" id="btn-spin" onclick="spinRoulette()">🎰 Вращать</button>
+    </div>
+    <!-- Last game info -->
+    <div class="gu-last-game" id="gu-last-game" style="display:none">
+      <div class="gu-last-badge" id="gu-last-badge">WIN</div>
+      <span>Ставка: <strong id="gu-last-stake">0</strong> TON</span>
+      <span id="gu-last-result-text">Выигрыш: <strong id="gu-last-result">0</strong> TON</span>
+    </div>
+  </div>
+  <!-- Spin result overlay -->
+  <div class="gu-result-overlay" id="gu-result-overlay">
+    <div class="gu-result-box" id="gu-result-box">
+      <div class="gu-result-icon" id="gu-result-icon">🎉</div>
+      <div class="gu-result-title" id="gu-result-title">WIN!</div>
+      <div class="gu-result-amount" id="gu-result-amount">+0.13 TON</div>
+      <button class="btn-continue" onclick="closeResultOverlay()">Продолжить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Rolls Screen ── -->
+<div class="game-screen" id="screen-rolls">
+  <div class="game-screen-header">
+    <button class="btn-back" onclick="closeGameScreen('rolls')">← Назад</button>
+    <span class="game-screen-title">💎 Rolls</span>
+    <span class="game-screen-bal" id="rolls-balance">0 TON</span>
+  </div>
+  <div class="rolls-container">
+    <!-- Countdown -->
+    <div class="rolls-countdown">
+      <span class="rolls-countdown-label">SPINNING IN</span>
+      <span class="rolls-countdown-time" id="rolls-countdown">10.00</span>
+    </div>
+    <!-- Chips strip -->
+    <div class="rolls-chips-strip">
+      <div class="rolls-pointer-arrow">▼</div>
+      <div class="rolls-chips" id="rolls-chips">
+        <!-- generated dynamically -->
+      </div>
+    </div>
+    <!-- Last 100 stats -->
+    <div class="rolls-stats">
+      <span class="rolls-stats-label">Last 100</span>
+      <div class="rolls-mini-history" id="rolls-mini-history"></div>
+      <div class="rolls-counts">
+        <span class="count-red" id="rolls-count-red">0</span>
+        <span class="count-green" id="rolls-count-green">0</span>
+        <span class="count-blue" id="rolls-count-blue">0</span>
+      </div>
+    </div>
+    <!-- Bet panel -->
+    <div class="rolls-bet-panel">
+      <div class="rolls-bet-amount">
+        <label>Сумма ставки</label>
+        <div class="rolls-amt-wrap">
+          <button onclick="changeRollsStake(-0.1)">−</button>
+          <input type="number" id="rolls-stake-input" value="0.1" step="0.01" min="0.01"/>
+          <button onclick="changeRollsStake(0.1)">＋</button>
+        </div>
+      </div>
+      <div class="rolls-color-btns">
+        <button class="rolls-color-btn rolls-red" onclick="placeBet('red')">
+          <span class="rolls-color-swatch red-swatch"></span>
+          <span>Red <small>2×</small></span>
+        </button>
+        <button class="rolls-color-btn rolls-green" onclick="placeBet('green')">
+          <span class="rolls-color-swatch green-swatch"></span>
+          <span>Green <small>10×</small></span>
+        </button>
+        <button class="rolls-color-btn rolls-blue" onclick="placeBet('blue')">
+          <span class="rolls-color-swatch blue-swatch"></span>
+          <span>Blue <small>2×</small></span>
+        </button>
+      </div>
+      <!-- Active bet display -->
+      <div class="rolls-active-bet" id="rolls-active-bet" style="display:none">
+        <span>Ваша ставка:</span>
+        <span class="rolls-bet-color" id="rolls-bet-color">—</span>
+        <span class="rolls-bet-amt" id="rolls-bet-amt">0 TON</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Mutants Screen ── -->
+<div class="game-screen" id="screen-mutants">
+  <div class="game-screen-header">
+    <button class="btn-back" onclick="closeGameScreen('mutants')">← Назад</button>
+    <span class="game-screen-title">📦 Mutants</span>
+    <span class="game-screen-bal" id="mutants-balance">0 TON</span>
+  </div>
+  <div class="mutants-container" id="mutants-container">
+    <!-- tabs: All / Free / Limited -->
+    <div class="mutants-tabs">
+      <button class="mutants-tab active" onclick="filterCases('all',this)">Все</button>
+      <button class="mutants-tab" onclick="filterCases('free',this)">Бесплатные</button>
+      <button class="mutants-tab" onclick="filterCases('limited',this)">Лимитированные</button>
+    </div>
+    <div class="cases-grid" id="cases-grid">
+      <!-- Free Case -->
+      <div class="case-card" data-filter="free" onclick="openCase('free')">
+        <div class="case-card-img">🎁</div>
+        <div class="case-card-name">Ежедневный кейс</div>
+        <div class="case-card-price free-price" id="free-case-timer">Бесплатно</div>
+      </div>
+      <!-- Regular Case 1 -->
+      <div class="case-card" data-filter="regular" onclick="openCase('regular')">
+        <div class="case-card-img">💎</div>
+        <div class="case-card-name">Обычный кейс</div>
+        <div class="case-card-price">💎 5 TON</div>
+      </div>
+      <!-- Regular Case 2 (same odds, different skin) -->
+      <div class="case-card" data-filter="regular" onclick="openCase('regular')">
+        <div class="case-card-img">🏺</div>
+        <div class="case-card-name">Кейс Артефакт</div>
+        <div class="case-card-price">💎 5 TON</div>
+      </div>
+      <!-- Snoop Limited -->
+      <div class="case-card case-card-limited" data-filter="limited" onclick="openCase('snoop')">
+        <div class="case-card-badge">Limited</div>
+        <div class="case-card-img">🐕</div>
+        <div class="case-card-name">Snoop Gifts</div>
+        <div class="case-card-price limited-price">💎 7 TON</div>
+      </div>
+    </div>
+  </div>
+  <!-- Locked overlay (if deposit < 5 TON) -->
+  <div class="mutants-locked" id="mutants-locked">
+    <div class="mutants-locked-box">
+      <div class="mutants-locked-icon">🔒</div>
+      <div class="mutants-locked-title">Игра недоступна</div>
+      <div class="mutants-locked-desc">Для доступа необходимо пополнить баланс на 5+ TON</div>
+      <button class="btn-unlock-deposit" onclick="closeGameScreen('mutants');openDepositModal()">💰 Пополнить</button>
+    </div>
+  </div>
+  <!-- Case opening animation overlay -->
+  <div class="case-open-overlay" id="case-open-overlay">
+    <div class="case-open-box">
+      <div class="case-open-anim" id="case-open-anim">
+        <div class="case-open-strip" id="case-open-strip"></div>
+      </div>
+      <div class="case-open-result" id="case-open-result" style="display:none">
+        <div class="case-result-icon" id="case-result-icon">🎁</div>
+        <div class="case-result-name" id="case-result-name">Prize!</div>
+        <div class="case-result-value" id="case-result-value">+1 TON</div>
+        <button class="btn-continue" onclick="closeCaseResult()">Продолжить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Deposit Modal -->
+<div class="modal-overlay" id="modal-deposit">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeDepositModal()">×</button>
+    <h2 class="modal-title">💰 Пополнить баланс</h2>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="dep-tab-ton" onclick="switchDepTab('ton')">TON</button>
+      <button class="modal-tab" id="dep-tab-stars" onclick="switchDepTab('stars')">Stars</button>
+    </div>
+    <!-- TON tab -->
+    <div class="dep-panel" id="dep-panel-ton">
+      <label>Сумма (TON)</label>
+      <input type="number" id="dep-ton-amount" placeholder="Например: 1" step="0.01" min="0.01"/>
+      <div class="dep-ton-info">Отправьте TON на адрес бота с указанным мемо</div>
+      <button class="btn-deposit-submit" onclick="submitTonDeposit()">Получить адрес</button>
+      <div class="dep-ton-address" id="dep-ton-address" style="display:none">
+        <div class="dep-addr-label">Адрес кошелёка бота:</div>
+        <div class="dep-addr-value" id="dep-addr-value">—</div>
+        <div class="dep-addr-label">Мемо (обязательно!):</div>
+        <div class="dep-addr-value" id="dep-memo-value">—</div>
+        <button class="btn-confirm-ton" onclick="confirmTonDeposit()">✓ Я отправил TON</button>
+      </div>
+    </div>
+    <!-- Stars tab -->
+    <div class="dep-panel" id="dep-panel-stars" style="display:none">
+      <label>Количество Stars</label>
+      <input type="number" id="dep-stars-amount" placeholder="Например: 100" step="1" min="100"/>
+      <div class="dep-stars-conv" id="dep-stars-conv">100 Stars = 1.099 TON</div>
+      <button class="btn-deposit-submit" onclick="submitStarsDeposit()">Оплатить Stars</button>
+    </div>
+  </div>
+</div>
+
+<!-- Withdraw Modal -->
+<div class="modal-overlay" id="modal-withdraw">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modal-withdraw')">×</button>
+    <h2 class="modal-title">📤 Вывод TON</h2>
+    <div class="withdraw-info">Минимум вывода: 10 TON</div>
+    <label>Сумма (TON)</label>
+    <input type="number" id="wd-amount" placeholder="Минимум 10" step="0.01" min="10"/>
+    <label>Адрес TON кошелёка</label>
+    <input type="text" id="wd-wallet" placeholder="UQ..."/>
+    <button class="btn-deposit-submit" onclick="submitWithdraw()">Создать заявку</button>
+    <!-- Pending requests -->
+    <div class="withdraw-pending" id="withdraw-pending"></div>
+  </div>
+</div>
+
+<!-- Referral Modal -->
+<div class="modal-overlay" id="modal-referral">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modal-referral')">×</button>
+    <h2 class="modal-title">🔗 Рефералы</h2>
+    <div class="ref-link-wrap">
+      <span class="ref-link-label">Ваша ссылка:</span>
+      <div class="ref-link-box">
+        <input type="text" id="ref-link-input" readonly/>
+        <button class="btn-copy-ref" onclick="copyRefLink()">📋</button>
+      </div>
+    </div>
+    <div class="ref-stats">
+      <div class="ref-stat"><span class="ref-stat-val" id="ref-invited">0</span><span>Приглашено</span></div>
+      <div class="ref-stat"><span class="ref-stat-val" id="ref-earned">0</span><span>Заработано (TON)</span></div>
+      <div class="ref-stat"><span class="ref-stat-val" id="ref-percent-disp">10%</span><span>Комиссия</span></div>
+    </div>
+    <div class="ref-withdraw-wrap" id="ref-withdraw-wrap" style="display:none">
+      <span>Реф. баланс ≥ 3 TON — можно вывести на баланс</span>
+      <button class="btn-ref-withdraw" onclick="withdrawRefBalance()">Вывести на баланс</button>
+    </div>
+    <div class="ref-list" id="ref-list">
+      <div class="ref-list-title">Приглашённые</div>
+    </div>
+  </div>
+</div>
+
+<!-- Inventory item action modal -->
+<div class="modal-overlay" id="modal-inv-action">
+  <div class="modal-box modal-box-small">
+    <button class="modal-close" onclick="closeModal('modal-inv-action')">×</button>
+    <div class="inv-action-item">
+      <div class="inv-action-icon" id="inv-action-icon">🎁</div>
+      <div class="inv-action-name" id="inv-action-name">Gift</div>
+      <div class="inv-action-price">Продать за <strong id="inv-action-price-val">0</strong> TON</div>
+    </div>
+    <div class="inv-action-btns">
+      <button class="btn-inv-withdraw" onclick="withdrawInventoryItem()">📤 Вывести</button>
+      <button class="btn-inv-sell" onclick="sellInventoryItem()">💰 Продать</button>
+    </div>
+    <div class="inv-action-msg" id="inv-action-msg" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script src="./js/app.js"></script>
+</body>
+</html>

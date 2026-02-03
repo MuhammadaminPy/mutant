@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Panel — TON Games</title>
+<style>
+/* ═══ ADMIN PANEL STYLES ═══ */
+:root {
+  --bg:#0d0d1a; --card:#161628; --card2:#1e1e38;
+  --gold:#c9a227; --gold-light:#e8cc6a;
+  --red:#e84545; --blue:#4a9eff; --green:#3edc81;
+  --text:#ddd; --dim:#7a7a9a; --dim2:#5a5a7a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px;}
+h1{color:var(--gold-light);font-size:24px;margin-bottom:6px;}
+h2{color:var(--gold-light);font-size:18px;margin-bottom:12px;}
+h3{color:var(--text);font-size:15px;margin-bottom:8px;}
+.subtitle{color:var(--dim);font-size:13px;margin-bottom:20px;}
+a{color:var(--blue);text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+/* Layout */
+.admin-wrap{max-width:960px;margin:0 auto;}
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px;}
+.stat-box{background:var(--card);border-radius:12px;padding:18px;border:1px solid rgba(201,162,39,0.12);}
+.stat-box-label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.stat-box-value{font-size:26px;font-weight:800;color:var(--gold-light);}
+.stat-box-sub{font-size:12px;color:var(--dim2);margin-top:4px;}
+
+/* Search */
+.search-wrap{display:flex;gap:10px;margin-bottom:20px;}
+.search-wrap input{flex:1;background:var(--card2);border:1px solid rgba(201,162,39,0.2);border-radius:10px;padding:10px 14px;color:#fff;font-size:15px;outline:none;}
+.search-wrap input:focus{border-color:var(--gold);}
+.btn{background:var(--gold);color:#111;border:none;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;}
+.btn:active{opacity:0.8;}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:8px;}
+.btn-outline{background:transparent;color:var(--gold);border:1px solid var(--gold);}
+.btn-red{background:var(--red);color:#fff;}
+.btn-green{background:var(--green);color:#111;}
+.btn-blue{background:var(--blue);color:#fff;}
+
+/* Tables */
+.table-wrap{background:var(--card);border-radius:12px;border:1px solid rgba(255,255,255,0.06);overflow:hidden;margin-bottom:20px;}
+table{width:100%;border-collapse:collapse;}
+th{background:var(--card2);padding:10px 12px;text-align:left;font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:0.6px;font-weight:600;}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:14px;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(201,162,39,0.04);}
+.clickable{cursor:pointer;color:var(--blue);}
+.clickable:hover{text-decoration:underline;}
+
+/* User detail panel */
+.panel{background:var(--card);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.06);margin-bottom:18px;}
+.panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.user-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ud-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.ud-row:last-child{border-bottom:none;}
+.ud-label{color:var(--dim);font-size:13px;}
+.ud-value{font-weight:600;font-size:13px;}
+
+/* Balance adjust */
+.adj-wrap{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.adj-wrap input{background:var(--card2);border:1px solid rgba(201,162,39,0.2);border-radius:8px;padding:7px 10px;color:#fff;font-size:14px;width:100px;outline:none;}
+
+/* Withdrawal actions */
+.wd-actions{display:flex;gap:8px;}
+.wd-note-input{background:var(--card2);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 10px;color:#fff;font-size:13px;flex:1;outline:none;}
+
+/* Tabs */
+.admin-tabs{display:flex;gap:6px;margin-bottom:18px;}
+.admin-tab{background:var(--card2);border:1px solid rgba(255,255,255,0.08);color:var(--dim);border-radius:18px;padding:6px 16px;font-size:13px;cursor:pointer;}
+.admin-tab.active{background:var(--gold);color:#111;border-color:var(--gold);font-weight:600;}
+
+/* Toast */
+.toast{position:fixed;top:20px;right:20px;background:#222;color:#fff;padding:10px 20px;border-radius:16px;font-size:14px;opacity:0;transform:translateY(-20px);transition:all 0.3s;z-index:999;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.ok{background:#2a6a3a;}
+.toast.err{background:#6a2a2a;}
+
+/* History */
+.history-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;}
+.history-item:last-child{border-bottom:none;}
+.hist-type{color:var(--blue);font-weight:600;}
+.hist-win{color:var(--green);font-weight:600;}
+.hist-lose{color:var(--red);font-weight:600;}
+
+/* Responsive */
+@media(max-width:600px){
+  body{padding:12px;}
+  .admin-grid{grid-template-columns:repeat(2,1fr);}
+  .user-detail-grid{grid-template-columns:1fr;}
+  table{font-size:12px;}
+  td,th{padding:7px 8px;}
+}
+</style>
+</head>
+<body>
+<div class="admin-wrap">
+  <h1>⚙️ Admin Panel</h1>
+  <p class="subtitle">TON Games — Управление</p>
+
+  <!-- Global Stats -->
+  <div class="admin-grid" id="stats-grid">
+    <div class="stat-box"><div class="stat-box-label">Всего пользователей</div><div class="stat-box-value" id="s-total">—</div></div>
+    <div class="stat-box"><div class="stat-box-label">Онлайн сейчас</div><div class="stat-box-value" id="s-now" style="color:var(--green)">—</div></div>
+    <div class="stat-box"><div class="stat-box-label">За 24 часа</div><div class="stat-box-value" id="s-24h" style="color:var(--blue)">—</div></div>
+    <div class="stat-box"><div class="stat-box-label">Всего пополнено</div><div class="stat-box-value" id="s-dep">—</div><div class="stat-box-sub">TON</div></div>
+  </div>
+
+  <!-- Admin Tabs -->
+  <div class="admin-tabs">
+    <button class="admin-tab active" onclick="adminTab('users',this)">👥 Пользователи</button>
+    <button class="admin-tab" onclick="adminTab('withdrawals',this)">📤 Выводы</button>
+  </div>
+
+  <!-- Users Tab -->
+  <div id="admin-panel-users">
+    <div class="search-wrap">
+      <input type="text" id="user-search" placeholder="Поиск по ID или имени..." oninput="searchUsers()"/>
+    </div>
+    <div class="table-wrap" id="users-table-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Имя</th><th>Баланс</th><th>Пополнено</th><th>Игры</th><th></th></tr></thead>
+        <tbody id="users-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Withdrawals Tab -->
+  <div id="admin-panel-withdrawals" style="display:none">
+    <h3>⏳ Ожидающие заявки на вывод</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ID заявки</th><th>Пользователь</th><th>Сумма</th><th>Кошелёк</th><th>Время</th><th>Действие</th></tr></thead>
+        <tbody id="wd-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- User Detail Panel (hidden by default) -->
+  <div id="user-detail-panel" style="display:none">
+    <div class="panel">
+      <div class="panel-header">
+        <h2 id="ud-title">Пользователь</h2>
+        <button class="btn btn-sm btn-outline" onclick="closeUserDetail()">✕ Закрыть</button>
+      </div>
+      <div class="user-detail-grid">
+        <div>
+          <div class="ud-row"><span class="ud-label">Telegram ID</span><span class="ud-value" id="ud-tid">—</span></div>
+          <div class="ud-row"><span class="ud-label">Имя</span><span class="ud-value" id="ud-name">—</span></div>
+          <div class="ud-row"><span class="ud-label">Username</span><span class="ud-value" id="ud-user">—</span></div>
+          <div class="ud-row"><span class="ud-label">Баланс</span><span class="ud-value" id="ud-bal">—</span></div>
+          <div class="ud-row"><span class="ud-label">Всего пополнено</span><span class="ud-value" id="ud-dep">—</span></div>
+          <div class="ud-row"><span class="ud-label">Игр сыграно</span><span class="ud-value" id="ud-games">—</span></div>
+        </div>
+        <div>
+          <div class="ud-row"><span class="ud-label">Реф. процент</span><span class="ud-value" id="ud-refp">—</span></div>
+          <div class="ud-row"><span class="ud-label">Реф. баланс</span><span class="ud-value" id="ud-refb">—</span></div>
+          <div class="ud-row"><span class="ud-label">Регистрация</span><span class="ud-value" id="ud-created">—</span></div>
+          <div class="ud-row"><span class="ud-label">Последнее онлайн</span><span class="ud-value" id="ud-online">—</span></div>
+        </div>
+      </div>
+      <!-- Balance adjust -->
+      <div style="margin-top:16px;">
+        <h3>💰 Корректировка баланса</h3>
+        <div class="adj-wrap">
+          <input type="number" id="adj-amount" placeholder="Сумма" step="0.01"/>
+          <button class="btn btn-sm btn-green" onclick="adjustBalance('add')">＋ Начислить</button>
+          <button class="btn btn-sm btn-red" onclick="adjustBalance('sub')">− Убрать</button>
+        </div>
+      </div>
+      <!-- Ref percent -->
+      <div style="margin-top:14px;">
+        <h3>📊 Реферальный процент</h3>
+        <div class="adj-wrap">
+          <input type="number" id="adj-refp" placeholder="%" step="1" value="10"/>
+          <button class="btn btn-sm" onclick="adjustRefPercent()">Сохранить</button>
+        </div>
+      </div>
+    </div>
+    <!-- Referrals -->
+    <div class="panel">
+      <h3>🔗 Рефералы этого пользователя</h3>
+      <div id="ud-refs">—</div>
+    </div>
+    <!-- Game History -->
+    <div class="panel">
+      <h3>📜 История игр (последние 20)</h3>
+      <div id="ud-history">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = window.location.origin;
+let _currentUserId = null;
+
+function toast(msg, type='ok') {
+  let t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + type;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── Load Stats ──
+async function loadStats() {
+  try {
+    let res = await fetch(API + '/api/admin/stats');
+    let d = await res.json();
+    document.getElementById('s-total').textContent = d.total_users;
+    document.getElementById('s-now').textContent = d.online_now;
+    document.getElementById('s-24h').textContent = d.online_24h;
+    document.getElementById('s-dep').textContent = d.total_deposited.toFixed(2);
+  } catch(e) {
+    // Demo fallback
+    document.getElementById('s-total').textContent = '142';
+    document.getElementById('s-now').textContent = '23';
+    document.getElementById('s-24h').textContent = '67';
+    document.getElementById('s-dep').textContent = '284.50';
+  }
+}
+
+// ── Admin Tab Switch ──
+function adminTab(tab, btn) {
+  document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('admin-panel-users').style.display = tab==='users' ? 'block' : 'none';
+  document.getElementById('admin-panel-withdrawals').style.display = tab==='withdrawals' ? 'block' : 'none';
+  if (tab==='withdrawals') loadPendingWithdrawals();
+}
+
+// ── Search Users ──
+let searchTimeout;
+async function searchUsers() {
+  clearTimeout(searchTimeout);
+  let q = document.getElementById('user-search').value.trim();
+  searchTimeout = setTimeout(async () => {
+    try {
+      let res = await fetch(API + '/api/admin/users/search?q=' + encodeURIComponent(q));
+      let users = await res.json();
+      renderUsersTable(users);
+    } catch(e) {
+      // Demo data
+      renderUsersTable([
+        {telegram_id:12345, name:'Demo User', username:'demouser', balance:1.5},
+        {telegram_id:67890, name:'Alice', username:'alice_ton', balance:23.4},
+      ]);
+    }
+  }, 400);
+}
+
+function renderUsersTable(users) {
+  let tbody = document.getElementById('users-tbody');
+  if (!users.length) { tbody.innerHTML = '<tr><td colspan="6" style="color:var(--dim);text-align:center;padding:20px;">Нет результатов</td></tr>'; return; }
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td>${u.telegram_id}</td>
+      <td class="clickable" onclick="openUserDetail(${u.telegram_id})">${u.name || 'User'}</td>
+      <td style="color:var(--gold-light);font-weight:600">${(u.balance||0).toFixed(4)}</td>
+      <td>${(u.total_deposited||0).toFixed(2)}</td>
+      <td>${u.games_played||0}</td>
+      <td><button class="btn btn-sm btn-outline" onclick="openUserDetail(${u.telegram_id})">Открыть</button></td>
+    </tr>
+  `).join('');
+}
+
+// ── User Detail ──
+async function openUserDetail(tid) {
+  _currentUserId = tid;
+  try {
+    let res = await fetch(API + '/api/admin/user/' + tid);
+    let data = await res.json();
+    let u = data.user;
+    document.getElementById('user-detail-panel').style.display = 'block';
+    document.getElementById('ud-title').textContent = u.first_name || 'Пользователь';
+    document.getElementById('ud-tid').textContent = u.telegram_id;
+    document.getElementById('ud-name').textContent = u.first_name || '—';
+    document.getElementById('ud-user').textContent = u.username || '—';
+    document.getElementById('ud-bal').textContent = u.balance.toFixed(4) + ' TON';
+    document.getElementById('ud-dep').textContent = u.total_deposited.toFixed(2) + ' TON';
+    document.getElementById('ud-games').textContent = u.games_played;
+    document.getElementById('ud-refp').textContent = u.ref_percent + '%';
+    document.getElementById('ud-refb').textContent = u.ref_balance.toFixed(4) + ' TON';
+    document.getElementById('ud-created').textContent = u.created_at;
+    document.getElementById('ud-online').textContent = u.last_online;
+    document.getElementById('adj-refp').value = u.ref_percent;
+
+    // Refs
+    let refsEl = document.getElementById('ud-refs');
+    if (data.referrals.length) {
+      refsEl.innerHTML = data.referrals.map(r => `<div style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;justify-content:space-between;font-size:13px;"><span>${r.name||'User'}</span><span style="color:var(--gold-light)">${r.deposited.toFixed(2)} TON</span></div>`).join('');
+    } else { refsEl.innerHTML = '<div style="color:var(--dim2);font-size:13px;">Нет рефералов</div>'; }
+
+    // History
+    let histEl = document.getElementById('ud-history');
+    if (data.game_history.length) {
+      histEl.innerHTML = data.game_history.map(h => `
+        <div class="history-item">
+          <span><span class="hist-type">${h.type}</span> — ставка ${h.stake} TON</span>
+          <span>
+            <span class="${h.result >= 0 ? 'hist-win' : 'hist-lose'}">${h.result >= 0 ? '+' : ''}${h.result.toFixed(4)}</span>
+            <span style="color:var(--dim2);margin-left:8px;font-size:11px;">${h.played_at}</span>
+          </span>
+        </div>
+      `).join('');
+    } else { histEl.innerHTML = '<div style="color:var(--dim2);font-size:13px;">Нет истории</div>'; }
+
+    document.getElementById('user-detail-panel').scrollIntoView({behavior:'smooth'});
+  } catch(e) {
+    // Demo fallback
+    document.getElementById('user-detail-panel').style.display = 'block';
+    document.getElementById('ud-tid').textContent = tid;
+    document.getElementById('ud-name').textContent = 'Demo';
+    document.getElementById('ud-bal').textContent = '1.5000 TON';
+    document.getElementById('ud-dep').textContent = '10.00 TON';
+    document.getElementById('ud-games').textContent = '3';
+    document.getElementById('ud-refp').textContent = '10%';
+    document.getElementById('ud-refb').textContent = '0.45 TON';
+    document.getElementById('ud-created').textContent = '03.02.2026 20:00';
+    document.getElementById('ud-online').textContent = '03.02.2026 21:10';
+    document.getElementById('ud-refs').innerHTML = '<div style="color:var(--dim2);font-size:13px;">Нет рефералов</div>';
+    document.getElementById('ud-history').innerHTML = '<div class="history-item"><span><span class="hist-type">gift_upgrade</span> — ставка 0.1 TON</span><span class="hist-win">+0.03</span></div>';
+  }
+}
+
+function closeUserDetail() {
+  document.getElementById('user-detail-panel').style.display = 'none';
+}
+
+// ── Balance Adjust ──
+async function adjustBalance(action) {
+  let amt = parseFloat(document.getElementById('adj-amount').value);
+  if (!amt || amt <= 0) { toast('Введите сумму', 'err'); return; }
+  let payload = { telegram_id: _currentUserId };
+  payload[action === 'add' ? 'balance_add' : 'balance_add'] = action === 'sub' ? -amt : amt;
+  try {
+    let res = await fetch(API + '/api/admin/user/update', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    let data = await res.json();
+    if (data.success) {
+      document.getElementById('ud-bal').textContent = data.new_balance.toFixed(4) + ' TON';
+      toast((action==='add'?'Начислено':'Убрано') + ' ' + amt + ' TON', 'ok');
+    }
+  } catch(e) { toast('Demo: ' + (action==='add'?'+':'-') + amt + ' TON', 'ok'); }
+}
+
+// ── Ref Percent ──
+async function adjustRefPercent() {
+  let val = parseFloat(document.getElementById('adj-refp').value);
+  if (isNaN(val)) { toast('Введите число', 'err'); return; }
+  try {
+    let res = await fetch(API + '/api/admin/user/update', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ telegram_id: _currentUserId, ref_percent: val }) });
+    let data = await res.json();
+    if (data.success) { document.getElementById('ud-refp').textContent = val + '%'; toast('Реф. процент обновлён', 'ok'); }
+  } catch(e) { toast('Обновлено (demo)', 'ok'); }
+}
+
+// ── Pending Withdrawals ──
+async function loadPendingWithdrawals() {
+  try {
+    let res = await fetch(API + '/api/admin/withdrawals/pending');
+    let reqs = await res.json();
+    let tbody = document.getElementById('wd-tbody');
+    if (!reqs.length) { tbody.innerHTML = '<tr><td colspan="6" style="color:var(--dim);text-align:center;padding:20px;">Нет заявок</td></tr>'; return; }
+    tbody.innerHTML = reqs.map(r => `
+      <tr>
+        <td>${r.id}</td>
+        <td>${r.user_name} <span style="color:var(--dim);font-size:11px;">(${r.user_id})</span></td>
+        <td style="color:var(--gold-light);font-weight:600">${r.amount} TON</td>
+        <td style="font-size:12px;word-break:break-all;max-width:140px;">${r.wallet}</td>
+        <td style="font-size:12px;">${r.created_at}</td>
+        <td>
+          <div class="wd-actions">
+            <input class="wd-note-input" id="wd-note-${r.id}" placeholder="Примечание..."/>
+            <button class="btn btn-sm btn-green" onclick="wdAction(${r.id},'approve')">✓</button>
+            <button class="btn btn-sm btn-red" onclick="wdAction(${r.id},'reject')">✕</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  } catch(e) {
+    document.getElementById('wd-tbody').innerHTML = '<tr><td colspan="6" style="color:var(--dim);text-align:center;padding:20px;">Нет заявок (demo)</td></tr>';
+  }
+}
+
+async function wdAction(id, action) {
+  let note = document.getElementById('wd-note-' + id)?.value || '';
+  try {
+    let res = await fetch(API + `/api/admin/withdrawal/${id}/action`, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action, note }) });
+    let data = await res.json();
+    if (data.success) {
+      toast(action === 'approve' ? '✓ Одобрена' : '✕ Отклонена', action === 'approve' ? 'ok' : 'err');
+      loadPendingWithdrawals();
+    }
+  } catch(e) { toast('Обработано (demo)', 'ok'); }
+}
+
+// ── INIT ──
+loadStats();
+setInterval(loadStats, 30000); // refresh stats every 30s
+searchUsers(); // load initial users
+</script>
+</body>
+</html>
